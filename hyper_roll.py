@@ -3,6 +3,8 @@ import numpy as np
 
 from scipy.stats import hypergeom
 import altair as alt
+import plotly.express as px
+
 
 import streamlit as st
 
@@ -62,21 +64,24 @@ def draw_chart(prob_tier, N_champ, n_champ, N_tier, n_tier, gold, cost):
         P_n = [np.linalg.matrix_power(P, int(np.floor((gold-i*cost)/2))) for i in range(size)]
 
         prb = pd.DataFrame({
-            'Proba after rolling': P_n[0][0, :],
-            'CDF after buying': [np.sum(P_n[i][0,i:]) for i in range(size)],
+            'Proba': P_n[0][0, :],
+            '1-CDF after buying': [np.sum(P_n[i][0,i:]) for i in range(size)],
             'Number of draws': [k for k in range(0, size)]
             })
 
         # Chart
         #st.write(prb)
-        st.write(alt.Chart(prb).mark_bar().encode(
-                x='Number of draws',
-                y='Proba after rolling'
-            ))
-        st.write(alt.Chart(prb).mark_bar().encode(
-                x='Number of draws',
-                y='CDF after buying'
-            ))
+        fig1 = px.bar(prb, y='Proba', x='Number of draws',
+                title="Probability to find x cards if you roll for %i golds" %gold)
+        fig1.update_layout(yaxis=dict(range=[0,1]), height=300)
+
+        fig2 = px.bar(prb, y='1-CDF after buying', x='Number of draws', title="Probability to find and buy at least x cards")
+        fig2.update_layout(yaxis=dict(range=[0,1]), height=300)
+
+        st.write(fig1)
+        st.write(fig2)
+
+
     else:
         st.text("You can't draw this champ !")
 
