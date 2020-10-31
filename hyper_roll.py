@@ -58,7 +58,7 @@ def draw_chart(prob_tier, N_champ, n_champ, N_tier, n_tier, gold, cost):
     # Cumulative distribution funciton
     if prob_tier>0:
         
-        size = np.min((10, N_champ-n_champ))
+        size = np.min((10, N_champ-n_champ+1))
         P = build_univariate_transition_matrix(N_tier-n_tier-n_champ, N_champ-n_champ, prob_tier)
                             
         P_n = [np.linalg.matrix_power(P, int(np.floor((gold-i*cost)/2))) for i in range(size)]
