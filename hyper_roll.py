@@ -9,8 +9,7 @@ import streamlit as st
 from matrix_utils import build_univariate_transition_matrix 
 
 def main():
-    page = st.sidebar.selectbox("Choose a page", ["Homepage", "Exploration"])
-    st.header("High roll probablities")
+    st.header("Hyper roll probablities")
     st.sidebar.title("Choose settings")
 
     data = pd.read_csv("tier_stats.csv", header=0, index_col=0)
@@ -19,7 +18,7 @@ def main():
 
     data_tier = data[str(tier)]
     draw_chart(data_tier[str(level)]/100, data_tier['pool'], n_champ,
-            data_tier['N_champs']*data_tier['pool'], n_tier, gold)
+            data_tier['N_champs']*data_tier['pool'], n_tier, gold, tier)
 
 
 
@@ -53,24 +52,30 @@ def select_params():
 
 
 
-def draw_chart(prob_tier, N_champ, n_champ, N_tier, n_tier, gold):
+def draw_chart(prob_tier, N_champ, n_champ, N_tier, n_tier, gold, cost):
     # Cumulative distribution funciton
     if prob_tier>0:
         
+        size = np.min((10, N_champ-n_champ))
         P = build_univariate_transition_matrix(N_tier-n_tier-n_champ, N_champ-n_champ, prob_tier)
                             
-        P_n = np.linalg.matrix_power(P, int(np.floor(gold/2)))
+        P_n = [np.linalg.matrix_power(P, int(np.floor((gold-i*cost)/2))) for i in range(size)]
 
         prb = pd.DataFrame({
-            'Proba': P_n[0, :],
-            'Number of draws': [k for k in range(0, np.min((10, N_champ-n_champ)))]
+            'Proba after rolling': P_n[0][0, :],
+            'CDF after buying': [np.sum(P_n[i][0,i:]) for i in range(size)],
+            'Number of draws': [k for k in range(0, size)]
             })
 
         # Chart
-        st.write(prb)
+        #st.write(prb)
         st.write(alt.Chart(prb).mark_bar().encode(
                 x='Number of draws',
-                y='Proba',
+                y='Proba after rolling'
+            ))
+        st.write(alt.Chart(prb).mark_bar().encode(
+                x='Number of draws',
+                y='CDF after buying'
             ))
     else:
         st.text("You can't draw this champ !")
