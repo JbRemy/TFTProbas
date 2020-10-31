@@ -2,7 +2,7 @@
 import streamlit as st
 
 # Importing pages
-import .hyper_roll
+import hyper_roll
 
 
 PAGES = {

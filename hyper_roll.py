@@ -1,9 +1,12 @@
 import pandas as pd
 import numpy as np
+
 from scipy.stats import hypergeom
 import altair as alt
 
 import streamlit as st
+
+from matrix_utils import build_univariate_transition_matrix 
 
 def main():
     page = st.sidebar.selectbox("Choose a page", ["Homepage", "Exploration"])
@@ -37,12 +40,12 @@ def select_params():
             value=2, min_value=0, max_value=29)
 
     # Number of cards of same tier already bought
-    n_tier = st.sidebar.number_selector(
+    n_tier = st.sidebar.number_input(
             'Number of cards of the same tier already bought (not including desiered champ)',
             value=25, min_value=0, max_value=300)
 
     # Gold
-    gold = st.sidebar.number_selector(
+    gold = st.sidebar.number_input(
             'How much gold do you want to invert',
             value=20, min_value=1, max_value=75)
     
@@ -53,12 +56,14 @@ def select_params():
 def draw_chart(prob_tier, N_champ, n_champ, N_tier, n_tier, gold):
     # Cumulative distribution funciton
     if prob_tier>0:
+        
+        P = build_univariate_transition_matrix(N_tier-n_tier-n_champ, N_champ-n_champ, prob_tier)
+                            
+        P_n = np.linalg.matrix_power(P, int(np.floor(gold/2)))
+
         prb = pd.DataFrame({
-            'Proba': [1 - hypergeom.cdf(k, 
-                np.int((N_tier-n_tier-n_champ)/prob_tier),
-                (N_champ-n_champ),
-                np.int(5*gold/2)) for k in range(0,10)],
-            'Number of draws': [k for k in range(0,10)]
+            'Proba': P_n[0, :],
+            'Number of draws': [k for k in range(0, np.min((10, N_champ-n_champ)))]
             })
 
         # Chart
