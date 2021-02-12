@@ -11,7 +11,20 @@ import streamlit as st
 from matrix_utils import build_univariate_transition_matrix 
 
 def main():
-    st.header("Hyper roll probablities")
+    st.markdown(
+        f"""
+    <style>
+        .reportview-container .main .block-container{{
+            max-width: {1200}px;
+        }}
+    </style>
+    """,
+        unsafe_allow_html=True,
+    )
+    link = '[Repo](https://github.com/sde-cdsp/TFTProbas) (credit: [JBRemy](https://github.com/JBRemy))'
+    st.markdown(link, unsafe_allow_html=True)
+    # st.write('')
+    st.header("Roll probabilities")
     st.sidebar.title("Choose settings")
 
     data = pd.read_csv("tier_stats.csv", header=0, index_col=0)
@@ -32,23 +45,23 @@ def select_params():
             )
     # Level
     level = st.sidebar.slider(
-            'Select your little legend level', value=5,
+            'Select your level', value=5,
                 min_value=1, max_value=9, step=1)
 
     # Number of cards of the champion already bought
     n_champ = st.sidebar.number_input(
-            'Number of cards of the same champion already bought',
+            'Number of copies of the champion to roll already out',
             value=2, min_value=0, max_value=29)
 
     # Number of cards of same tier already bought
     n_tier = st.sidebar.number_input(
-            'Number of cards of the same tier already bought (not including desiered champ)',
+            'Number of copies already out from your champion tier (not including the champ to roll)',
             value=25, min_value=0, max_value=300)
 
     # Gold
     gold = st.sidebar.number_input(
-            'How much gold do you want to invert',
-            value=20, min_value=1, max_value=75)
+            'How much gold to roll',
+            value=20, min_value=1, max_value=100)
     
     return tier, level, n_champ, n_tier, gold
 
@@ -62,23 +75,25 @@ def draw_chart(prob_tier, N_champ, n_champ, N_tier, n_tier, gold, cost):
         P = build_univariate_transition_matrix(N_tier-n_tier-n_champ, N_champ-n_champ, prob_tier)
                             
         P_n = [np.linalg.matrix_power(P, int(np.floor((gold-i*cost)/2))) for i in range(size)]
-
+        # print(P_n)
         prb = pd.DataFrame({
-            'Proba': P_n[0][0, :],
-            '1-CDF after buying': [np.sum(P_n[i][0,i:]) for i in range(size)],
-            'Number of draws': [k for k in range(0, size)]
+            'Proba': P_n[0][0, :][1:],
+            'Probability to draw': pd.Series([np.sum(P_n[i][0,i:]) * 100 for i in range(size)][1:]).round(2),
+            'Number of copies': [k for k in range(1, size)]
             })
 
         # Chart
         #st.write(prb)
-        fig1 = px.bar(prb, y='Proba', x='Number of draws',
-                title="Probability to find x cards if you roll for %i golds" %gold)
-        fig1.update_layout(yaxis=dict(range=[0,1]), height=300)
 
-        fig2 = px.bar(prb, y='1-CDF after buying', x='Number of draws', title="Probability to find and buy at least x cards")
-        fig2.update_layout(yaxis=dict(range=[0,1]), height=300)
+        # fig1 = px.bar(prb, y='Proba', x='Number of draws',
+        #         title="Probability to find x copies if you roll %i golds" %gold)
+        # fig1.update_layout(yaxis=dict(range=[0,100]), height=300)
 
-        st.write(fig1)
+        fig2 = px.bar(prb, y='Probability', x='Number of copies', title="Probability to draw your champion", text='Probability to draw')
+        fig2.update_layout(yaxis=dict(range=[0,100]), height=600, width=1000, xaxis={'tickmode': 'linear'})
+        fig2.update_traces(hovertemplate="At least %{x}: <b>%{y:.2f}</b> %<br><extra></extra>", texttemplate='<b>%{text:.2f}</b> %', textposition='outside')
+
+        # st.write(fig1)
         st.write(fig2)
 
 

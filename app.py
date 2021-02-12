@@ -6,7 +6,7 @@ import hyper_roll
 
 
 PAGES = {
-    "Hyper roll": hyper_roll,
+    "Roll": hyper_roll,
 }
 
 st.sidebar.title('Navigation')
