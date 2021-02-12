@@ -7,4 +7,4 @@ import altair as alt
 
 import streamlit as st
 
-subprocess.call('streamlit run main.py')
+subprocess.call('streamlit run app.py')
