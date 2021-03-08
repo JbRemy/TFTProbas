@@ -54,7 +54,7 @@ def select_params(data):
     nb_copies = data[str(tier)]['pool']
     n_champ = st.sidebar.number_input(
         'Number of copies of the champion already out',
-        value=0, min_value=0, max_value=nb_copies)
+        value=3, min_value=0, max_value=nb_copies)
 
     # Number of cards of same tier already bought
     n_tier = st.sidebar.number_input(
@@ -82,6 +82,7 @@ def draw_chart(prob_tier, N_champ, n_champ, N_tier, n_tier, gold, cost):
             'Probability': pd.Series([np.sum(P_n[i][0, i:]) * 100 for i in range(size)][1:]).round(2),
             'Number of copies': [k for k in range(1, size)]
         })
+        prb = prb[prb.iloc[:, 1] > 0.05]  # keep columns > 0.05% probability
 
         fig2 = px.bar(prb, y='Probability', x='Number of copies', title="Probability to draw your champion",
                       text='Probability')
