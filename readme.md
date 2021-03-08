@@ -2,4 +2,4 @@
 
 To run the app you need to have python installed:
 
-install dependencies in `requirements.txt` then run `python run_streamlit.py` or `streamlit run app.py`
+install dependencies in `requirements.txt` then run `streamlit run streamlit_app.py`
