@@ -1,11 +1,38 @@
-import streamlit as st
+import chosen_roll
+from helpers import *
 
 # Importing pages
-import hyper_roll
+import roll
 
 PAGES = {
-    "Roll": hyper_roll,
+    "Roll": roll,
+    "Chosen Roll": chosen_roll,
 }
+
+st.set_page_config(page_title='TFT Rolling odds', page_icon='assets/fob_legend.jpg', layout='wide', initial_sidebar_state='auto')
+tft_image = st.sidebar.image("assets/tft_fob.png", width=300)
+st.header("Odds of finding champions in Teamfight Tactics - Set 4.5")
+st.markdown(
+    f"""
+<style>
+    .reportview-container .main .block-container{{
+        max-width: {1200}px;
+    }}
+</style>
+""",
+    unsafe_allow_html=True,
+)
+
+github_repo = get_img_with_href('assets/github.png', 'https://github.com/sde-cdsp/TFTProbas', text="Project: ")
+credits = "by [LittleToof](https://twitter.com/Toof_pro) & [Pas De Bol](https://twitter.com/PasDeBolTFT)"
+
+left, right = st.beta_columns(2)
+with left:
+    st.markdown(github_repo, unsafe_allow_html=True)
+with right:
+    st.markdown(credits, unsafe_allow_html=True)
+
+left, right = st.beta_columns(2)
 
 st.sidebar.title('Navigation')
 selection = st.sidebar.radio("Go to", list(PAGES.keys()))

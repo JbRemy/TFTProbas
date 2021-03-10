@@ -3,28 +3,11 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+from helpers import page_layout
 from matrix_utils import build_univariate_transition_matrix
 
-
 def main():
-    st.markdown(
-        f"""
-    <style>
-        .reportview-container .main .block-container{{
-            max-width: {1200}px;
-        }}
-    </style>
-    """,
-        unsafe_allow_html=True,
-    )
-    link = "[Repo](https://github.com/sde-cdsp/TFTProbas) (credit: [JBRemy](https://github.com/JBRemy))"
-    left, right = st.beta_columns(2)
-    with left:
-        st.markdown(link, unsafe_allow_html=True)
-    with right:
-        st.text("Patch 11.5")
-    st.header("Roll probabilities")
-    st.sidebar.title("Settings")
+    page_layout()
 
     data = pd.read_csv("tier_stats.csv", header=0, index_col=0)
 
@@ -84,7 +67,7 @@ def draw_chart(prob_tier, N_champ, n_champ, N_tier, n_tier, gold, cost):
         })
         prb = prb[prb.iloc[:, 1] > 0.05]  # keep columns > 0.05% probability
 
-        fig2 = px.bar(prb, y='Probability', x='Number of copies', title="Probability to draw your champion",
+        fig2 = px.bar(prb, y='Probability', x='Number of copies', title="Odds to find your champion",
                       text='Probability')
         fig2.update_layout(yaxis=dict(range=[0, 100]), height=600, width=1000, xaxis={'tickmode': 'linear'})
         fig2.update_traces(hovertemplate="At least %{x}: <b>%{y:.2f}</b> %<br><extra></extra>",
@@ -92,9 +75,8 @@ def draw_chart(prob_tier, N_champ, n_champ, N_tier, n_tier, gold, cost):
 
         st.write(fig2)
 
-
     else:
-        st.text("You can't draw this champ !")
+        st.text("You can't find this champion with these settings!")
 
 
 if __name__ == "__main__":
