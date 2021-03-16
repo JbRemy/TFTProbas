@@ -3,11 +3,11 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from helpers import page_layout
+from helpers import roll_page_layout
 from matrix_utils import build_univariate_transition_matrix
 
 def main():
-    page_layout()
+    roll_page_layout()
 
     data = pd.read_csv("tier_stats.csv", header=0, index_col=0)
 
@@ -77,7 +77,3 @@ def draw_chart(prob_tier, N_champ, n_champ, N_tier, n_tier, gold, cost):
 
     else:
         st.text("You can't find this champion with these settings!")
-
-
-if __name__ == "__main__":
-    main()
