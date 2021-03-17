@@ -16,9 +16,9 @@ def page_layout(summoners):
         st.subheader("Please enter every summoner name in the sidebar.")
     else:
         with left:
-            st.subheader("Which player have you played against this round?")
+            st.subheader("Which player have you faced this round?")
         with right:
-            st.subheader("Which player can you play against next?")
+            st.subheader("Which player can you face next?")
         st.text("\n")
         st.text("\n")
 
@@ -37,7 +37,7 @@ def main():
     if not all(summoners):
         return
 
-    left, right = st.beta_columns(2)
+    left, center, right = st.beta_columns(3)
 
     with left:
         for index, s in enumerate(summoners):
@@ -47,8 +47,16 @@ def main():
                 ORDER += 1
                 setattr(ss, s, ORDER)
 
-    if ss is None:
+    with center:
+        if st.button('Reset matchmaking'):
+            ss = SessionState.get(**states)
+            for s in ss.__dict__:
+                setattr(ss, s, 0)
+            ORDER = 0
+
+    if not ss:
         return
+
     counter = Counter(ss.__dict__)
 
     not_matched_yet = [s[0] for s in counter.items() if s[1] == 0]
@@ -57,7 +65,6 @@ def main():
     possibilities = set(not_matched_yet) | set(can_match)
 
     with right:
-        st.markdown('You can fight:\n')
         for p in possibilities:
             st.markdown(f'- **{p}**')
 
