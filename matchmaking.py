@@ -42,15 +42,17 @@ def main():
     with left:
         for index, s in enumerate(summoners):
             if st.button(s, key=index):  # summoner name was clicked
-                if ss is None:  # button clicked for first time
-                    ss = SessionState.get(**states)
+                ss = SessionState.get(**states)
                 ORDER += 1
                 setattr(ss, s, ORDER)
 
     with center:
         if st.button('Reset matchmaking'):
             ss = SessionState.get(**states)
-            for s in ss.__dict__:
+            old_names = [s for s in ss.__dict__]  # remove old names if text inputs changed in sidebar
+            for name in old_names:
+                delattr(ss, name)
+            for s in summoners:
                 setattr(ss, s, 0)
             ORDER = 0
 
