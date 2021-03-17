@@ -23,7 +23,7 @@ def get_img_with_href(local_img_path, target_url, text=""):
     return html_code
 
 
-def page_layout():
+def roll_page_layout():
     st.text("\n")
     st.text("\n")
     st.text("\n")

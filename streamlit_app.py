@@ -1,17 +1,20 @@
-import chosen_roll
 from helpers import *
 
 # Importing pages
 import roll
+import chosen_roll
+import matchmaking
+
 
 PAGES = {
     "Roll": roll,
     "Chosen Roll": chosen_roll,
+    "Matchmaking": matchmaking,
 }
 
-st.set_page_config(page_title='TFT Rolling odds', page_icon='assets/fob_legend.jpg', layout='wide', initial_sidebar_state='auto')
+st.set_page_config(page_title='TFT tools', page_icon='assets/fob_legend.jpg', layout='wide', initial_sidebar_state='auto')
 tft_image = st.sidebar.image("assets/tft_fob.png", width=300)
-st.header("Odds of finding champions in Teamfight Tactics - Set 4.5")
+st.header("Teamfight Tactics tools - Set 4.5")
 st.markdown(
     f"""
 <style>
