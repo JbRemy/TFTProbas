@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 import json
+from collections import Counter
 
 from helpers import roll_page_layout
 from matrix_utils import build_univariate_transition_matrix
@@ -16,26 +17,19 @@ def main():
     with open('champions.json', 'r') as file:
         traits = pd.DataFrame(json.load(file))
 
-    tier, tot_n_traits, level, n_champ, n_tier, n_traits, gold = select_params(data, traits)
+    names, tiers, trait_ratio, level, n_champs, n_tiers = select_params(data, traits)
 
-    data_tier = data[str(tier)]
-    chosen_data_tier = data[str(tier)]
+    probs = []
+    for tier, n_champ, n_tier, ratio in zip(tiers, n_champs, n_tiers, trait_ratio):
+        data_tier = data[str(tier)]
+        chosen_data_tier = data[str(tier)]
+        prob = ratio*(chosen_data_tier[str(level)] / 100)
+        probs.append((data_tier['pool'] - n_champ)/(data_tier['N_champs'] * data_tier['pool'] - n_tier - n_champ)*0.5*prob)
 
-    prob = (n_traits/tot_n_traits)*(chosen_data_tier[str(level)] / 100)
-    draw_chart(prob, data_tier['pool'], n_champ,
-               data_tier['N_champs'] * data_tier['pool'], n_tier, gold, tier)
+    draw_chart(probs, names)
 
 
 def select_params(data, traits):
-    # Champion 
-    champ_name = st.sidebar.selectbox(
-        'Select the champion tier',
-        list(traits.name),
-    )
-    
-    tier = traits.loc[traits.name==champ_name, 'cost'].item()
-    tot_n_traits = len(traits.loc[traits.name==champ_name, 'traits'].item())
-
     # Level
     level = st.sidebar.selectbox(
         'Select your level',
@@ -43,50 +37,90 @@ def select_params(data, traits):
         index=7,
     )
 
-    # Number of cards of the champion already bought
-    nb_copies = data[str(tier)]['pool']
-    n_champ = st.sidebar.number_input(
-        'Number of copies of the champion already out',
-        value=3, min_value=0, max_value=nb_copies)
+    champs = st.sidebar.multiselect(
+            'Select the champion',
+            build_champ_select(traits), 
+    )
+    champions = [champ.split(' - ')[0] for champ in champs]
 
-    # Number of cards of same tier already bought
-    n_tier = st.sidebar.number_input(
-        f'Number of {tier} cost champions already out (excluding your champion)',
-        value=25, min_value=0, max_value=300)
+    
+    names, tiers, traits_ratio = build_champ_info(champions, traits)
+    print(names, tiers, traits_ratio)
 
-    # Number of traits requiered
-    n_traits = st.sidebar.number_input(
-        f'Number of interesting traits',
-        value=1, min_value=1, max_value=3)
+    n_champs = []
+    for champ, tier in zip(names, tiers):
+        # Number of cards of the champion already bought
+        nb_copies = data[str(tier)]['pool']
+        n_champs.append(st.sidebar.number_input(
+            'Number of copies of %s already out' % champ,
+            value=3, min_value=0, max_value=nb_copies))
 
-    # Gold
-    gold = st.sidebar.number_input(
-        'How much gold to roll',
-        value=50, min_value=1, max_value=100)
+    n_tiers = {}
+    for tier in np.unique(tiers):
+        # Number of cards of same tier already bought
+        n_tiers[str(tier)] = st.sidebar.number_input(
+            f'Number of {tier} cost champions already out (excluding your champion)',
+            value=25, min_value=0, max_value=300)
 
-    return tier, tot_n_traits, level, n_champ, n_tier, n_traits, gold
+    n_tiers = [n_tiers[str(tier)] for tier in tiers]
+
+    return names, tiers, traits_ratio, level, n_champs, n_tiers
 
 
-def draw_chart(prob_tier, N_champ, n_champ, N_tier, n_tier, gold, cost):
-    # Cumulative distribution function
-    if prob_tier > 0:
+def draw_chart(probs, names):
+    for prob, name in zip(probs, names):
+        if prob > 0:
 
-        P = (N_champ - n_champ)/(N_tier - n_tier - n_champ)*0.5*prob_tier
-        print(P)
+            prb = pd.DataFrame({
+                'Probability': pd.Series([(1-(1-prob)**i)*100 for i in range(1,51)]),
+                'Number of rolls': [i for i in range(1,51)]
+            })
 
-        P_n = [(1-(1 - P)**i)*100 for i in range(1,int(np.floor((gold - cost) / 2))+1)]
-        prb = pd.DataFrame({
-            'Probability': pd.Series(P_n),
-            'Number of rolls': [i for i in range(1,int(np.floor((gold - cost) / 2))+1)]
-        })
+            fig2 = px.bar(prb, y='Probability', x='Number of rolls', title="Odds to find a chosen %s with desired traits" % name,
+                          text='Probability')
+            fig2.update_layout(yaxis=dict(range=[0, 100]), height=600, width=1000, xaxis={'tickmode': 'linear'})
+            fig2.update_traces(hovertemplate="<b>%{y:.2f}</b> %<br><extra></extra>")
 
-        fig2 = px.bar(prb, y='Probability', x='Number of rolls', title="Odds to find your chosen champion",
-                      text='Probability')
-        fig2.update_layout(yaxis=dict(range=[0, 100]), height=600, width=1000, xaxis={'tickmode': 'linear'})
-        fig2.update_traces(hovertemplate="At least %{x}: <b>%{y:.2f}</b> %<br><extra></extra>",
-                           texttemplate='<b>%{text:.2f}</b> %', textposition='outside')
+            st.write(fig2)
 
-        st.write(fig2)
+        else:
+            st.text("You can't find %s with these settings!" % name)
 
-    else:
-        st.text("You can't find this champion with these settings!")
+    prob = np.prod([1-p for p in probs])
+    prb = pd.DataFrame({
+        'Probability': pd.Series([(1-prob**i)*100 for i in range(1,51)]),
+        'Number of rolls': [i for i in range(1,51)]
+    })
+
+    fig2 = px.bar(prb, y='Probability', x='Number of rolls', title="Odds to find one of the desierd chosen",
+                  text='Probability')
+    fig2.update_layout(yaxis=dict(range=[0, 100]), height=600, width=1000, xaxis={'tickmode': 'linear'})
+    fig2.update_traces(hovertemplate="<b>%{y:.2f}</b> %<br><extra></extra>")
+
+    st.write(fig2)
+
+def build_champ_select(traits):
+    out = []
+    for row in traits.iterrows():
+        for trait in row[1]['chosen_traits']:
+            out.append(row[1]['name'] + ' - ' + trait)
+
+    return out
+
+def build_champ_info(champions, traits):
+    names = []
+    tiers = []
+    traits_ratio = []
+
+    for champ, count in Counter(champions).items():
+        names.append(champ)
+        tiers.append(traits.loc[traits.name==champ, 'cost'].item())
+        traits_ratio.append(count/len(traits.loc[traits.name==champ, 'chosen_traits'].item()))
+
+    return names, tiers, traits_ratio
+
+
+
+
+
+
