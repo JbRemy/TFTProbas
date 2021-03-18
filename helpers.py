@@ -27,5 +27,4 @@ def roll_page_layout():
     st.text("\n")
     st.text("\n")
     st.text("\n")
-    st.subheader("Roll probabilities")
     st.sidebar.title("Settings")

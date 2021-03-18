@@ -27,7 +27,7 @@ st.markdown(
 )
 
 github_repo = get_img_with_href('assets/github.png', 'https://github.com/sde-cdsp/TFTProbas', text="Project: ")
-credits = "by [LittleToof](https://twitter.com/Toof_pro) & [Pas De Bol](https://twitter.com/PasDeBolTFT)"
+credits = "by [LittleToof](https://twitter.com/Toof_pro), [Pas De Bol](https://twitter.com/PasDeBolTFT) & [Jibs](https://twitter.com/jibsremy)"
 
 left, right = st.beta_columns(2)
 with left:
