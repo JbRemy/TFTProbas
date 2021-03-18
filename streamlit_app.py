@@ -9,7 +9,7 @@ import matchmaking
 PAGES = {
     "Roll": roll,
     "Chosen Roll": chosen_roll,
-    "Matchmaking": matchmaking,
+    # "Matchmaking": matchmaking,
 }
 
 st.set_page_config(page_title='TFT tools', page_icon='assets/fob_legend.jpg', layout='wide', initial_sidebar_state='auto')
