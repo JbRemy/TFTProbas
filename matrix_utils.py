@@ -18,17 +18,18 @@ def build_univariate_transition_matrix(N, n, p):
     return transition_matrix
 
 
-def build_univariate_transition_matrix_row(i, N, n, p, size):
+def build_univariate_transition_matrix_row(i, N, n, p, size, n_cards=5):
     """
         i (int): row index
         N (int): The number of remaining cards in the tier pool.
         n (int): The number of remaining desired champion card in the tier pool.
         p (float): The tier proba
         size (int): size of the matrix
+        n_cards (int): The number of cards to draw
     """
     row = np.zeros(size)
     for j in range(size):
         if j >= i and j <= i + 5:
-            row[j] = hypergeom.pmf(j - i, int((N - i) / p), n - i, 5)
+            row[j] = hypergeom.pmf(j - i, int((N - i) / p), n - i, n_cards)
 
     return row
