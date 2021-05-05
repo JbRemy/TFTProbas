@@ -1,4 +1,4 @@
-# A small app to calculate probabilities to draw cards in TFT
+# A small app to calculate probabilities to draw champions in TFT
 
 To run the app you need to have python installed:
 

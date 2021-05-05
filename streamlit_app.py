@@ -7,14 +7,14 @@ import matchmaking
 
 
 PAGES = {
-    "Roll": roll,
-    "Chosen Roll": chosen_roll,
+    "Rolling odds": roll,
+    # "Chosen Roll": chosen_roll, # obsolete set 4.5
     # "Matchmaking": matchmaking,
 }
 
-st.set_page_config(page_title='TFT tools', page_icon='assets/fob_legend.jpg', layout='wide', initial_sidebar_state='auto')
-tft_image = st.sidebar.image("assets/tft_fob.png", width=300)
-st.header("Teamfight Tactics tools - Set 4.5")
+st.set_page_config(page_title='TFT tools', page_icon='assets/evilsprite.jpg', layout='wide', initial_sidebar_state='auto')
+tft_image = st.sidebar.image("assets/reckoning_wide.png", width=300)
+st.header("Teamfight Tactics tools - Set 5")
 st.markdown(
     f"""
 <style>
