@@ -14,7 +14,12 @@ PAGES = {
 
 st.set_page_config(page_title='TFT tools', page_icon='assets/evilsprite.jpg', layout='wide', initial_sidebar_state='auto')
 tft_image = st.sidebar.image("assets/reckoning_wide.png", width=300)
-st.header("Teamfight Tactics tools - Set 5")
+left, right = st.beta_columns(2)
+with left:
+    st.header("Teamfight Tactics tools - Set 5")
+with right:
+    st.write("*patch 11.12*")
+
 st.markdown(
     f"""
 <style>

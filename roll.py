@@ -18,6 +18,10 @@ def main():
     draw_chart(data_tier[str(level)] / 100, data_tier['pool'], n_champ,
                data_tier['N_champs'] * data_tier['pool'], n_tier, gold, tier)
 
+    st.text('\n')
+    st.write('**_Note_**: Our odds calculation take into account the golds spent to buy a copy.')
+    st.write('_Example_: You have 50 golds to spend. The odd displayed to find 3+ copies of your 4-cost champion is after a maximum of 19 rolls (you spent 12 golds buying copies).')
+
 
 def select_params(data):
     # Champion Tier
