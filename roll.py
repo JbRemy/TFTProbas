@@ -63,7 +63,7 @@ def draw_chart(prob_tier, N_champ, n_champ, N_tier, n_tier, gold, cost):
         size = np.min((10, N_champ - n_champ + 1))
         P = build_univariate_transition_matrix(N_tier - n_tier - n_champ, N_champ - n_champ, prob_tier)
 
-        P_n = [np.linalg.matrix_power(P, int(np.floor((gold - i * cost) / 2))) for i in range(size)]
+        P_n = [np.linalg.matrix_power(P, max(int(np.floor((gold - i * cost) / 2)),0)) for i in range(size)]
         prb = pd.DataFrame({
             'Proba': P_n[0][0, :][1:],
             'Probability': pd.Series([np.sum(P_n[i][0, i:]) * 100 for i in range(size)][1:]).round(2),
